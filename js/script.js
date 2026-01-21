@@ -280,63 +280,31 @@ function initializeContactForm() {
     
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
             // Get form data
             const formData = {
-                name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 message: document.getElementById('message').value
             };
             
             // Basic validation
             if (!validateEmail(formData.email)) {
+                e.preventDefault();
                 showMessage('Please enter a valid email address.', 'error');
                 return;
             }
             
             if (formData.message.length < 10) {
+                e.preventDefault();
                 showMessage('Please enter a message with at least 10 characters.', 'error');
                 return;
             }
             
+            // Let the form submit naturally to Formspree
             // Show loading state
             const submitButton = contactForm.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
             submitButton.disabled = true;
-            
-            // Simulate form submission (replace with actual API call)
-            setTimeout(() => {
-                // Reset form
-                contactForm.reset();
-                
-                // Reset button
-                submitButton.innerHTML = originalButtonText;
-                submitButton.disabled = false;
-                
-                // Show success message
-                showMessage('Thank you for your message! I\'ll get back to you soon.', 'success');
-                
-                // Log form data (for development - remove in production)
-                console.log('Form submitted:', formData);
-                
-                // In a real application, you would send this data to a server:
-                // fetch('/api/contact', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(formData)
-                // })
-                // .then(response => response.json())
-                // .then(data => {
-                //     showMessage('Thank you! Your message has been sent.', 'success');
-                //     contactForm.reset();
-                // })
-                // .catch(error => {
-                //     showMessage('Sorry, there was an error. Please try again.', 'error');
-                // });
-                
-            }, 1500);
         });
     }
 }
