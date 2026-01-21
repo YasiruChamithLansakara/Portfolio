@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSkillBars();
     initializeContactForm();
     initializeActiveNavLinks();
+    checkFormSubmissionSuccess();
 });
 
 // ===================================
@@ -312,6 +313,22 @@ function initializeContactForm() {
 // ===================================
 // Utility Functions
 // ===================================
+
+// Check if form was successfully submitted
+function checkFormSubmissionSuccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.reset();
+            showMessage('Thank you for your message! I\'ll get back to you soon.', 'success');
+            
+            // Remove success parameter from URL
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    }
+}
 
 // Email validation
 function validateEmail(email) {
