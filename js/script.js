@@ -209,17 +209,38 @@ function initializeActiveNavLinks() {
 
 function initializeScrollAnimations() {
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.15,
+        rootMargin: '0px 0px -100px 0px'
     };
+    
+    // Track which sections have been animated
+    const animatedSections = new Set();
     
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                // Find the parent section
+                let section = entry.target.closest('section');
+                let sectionId = section ? section.id : null;
                 
-                // Optionally unobserve after animation
-                // observer.unobserve(entry.target);
+                // For skills and projects, animate all cards in the section at once
+                if (sectionId === 'skills' || sectionId === 'projects') {
+                    if (!animatedSections.has(sectionId)) {
+                        animatedSections.add(sectionId);
+                        const cards = section.querySelectorAll(sectionId === 'skills' ? '.skill-category' : '.project-card');
+                        cards.forEach((card, index) => {
+                            setTimeout(() => {
+                                card.classList.add('visible');
+                            }, index * 100); // Stagger animation by 100ms
+                        });
+                    }
+                } else {
+                    // For other elements, animate individually
+                    entry.target.classList.add('visible');
+                }
+                
+                // Unobserve after animation to prevent re-triggering
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
