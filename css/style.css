@@ -495,12 +495,17 @@ ul {
     min-height: 2.5rem;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Typewriter Animation */
 .typing-text {
     color: var(--text-secondary);
     font-weight: 700;
+    display: inline-block;
+    max-width: 100%;
 }
 
 .typing-cursor {
@@ -508,6 +513,7 @@ ul {
     font-weight: 400;
     animation: blink 1s infinite;
     margin-left: 2px;
+    display: inline-block;
 }
 
 @keyframes blink {
@@ -1625,6 +1631,15 @@ ul {
     .hero-title {
         font-size: clamp(0.9rem, 3vw, 1.2rem);
         min-height: 2rem;
+        line-height: 1.6;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+    }
+    
+    .typing-text {
+        max-width: 100%;
+        text-align: center;
     }
     
     .hero-tagline {
@@ -1940,6 +1955,21 @@ ul {
     .hero-title {
         font-size: clamp(0.85rem, 3.5vw, 1.1rem);
         min-height: 1.75rem;
+        line-height: 1.6;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        padding: 0 0.5rem;
+    }
+    
+    .typing-text {
+        max-width: 100%;
+        text-align: center;
+        word-break: break-word;
+    }
+    
+    .typing-cursor {
+        margin-left: 1px;
     }
     
     .hero-tagline {

@@ -280,6 +280,17 @@ function initializeContactForm() {
     const contactForm = document.getElementById('contactForm');
     
     if (contactForm) {
+        // Clear form on page load/back navigation (mobile fix)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+                const emailField = document.getElementById('email');
+                const messageField = document.getElementById('message');
+                if (emailField) emailField.value = '';
+                if (messageField) messageField.value = '';
+                contactForm.reset();
+            }
+        });
+        
         contactForm.addEventListener('submit', function(e) {
             // Get form data
             const formData = {
@@ -302,6 +313,7 @@ function initializeContactForm() {
             
             // Mark that form is being submitted
             sessionStorage.setItem('formSubmitted', 'true');
+            sessionStorage.setItem('formSubmitTime', Date.now().toString());
             
             // Let the form submit naturally to Formspree
             // Show loading state
@@ -320,32 +332,53 @@ function initializeContactForm() {
 function checkFormSubmissionSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
     const wasSubmitted = sessionStorage.getItem('formSubmitted') === 'true';
+    const submitTime = sessionStorage.getItem('formSubmitTime');
     
-    if (urlParams.get('success') === 'true' || wasSubmitted) {
+    // Check if submission was recent (within last 10 seconds)
+    const isRecentSubmission = submitTime && (Date.now() - parseInt(submitTime)) < 10000;
+    
+    if (urlParams.get('success') === 'true' || (wasSubmitted && isRecentSubmission)) {
         const contactForm = document.getElementById('contactForm');
         const emailField = document.getElementById('email');
         const messageField = document.getElementById('message');
         
         if (contactForm) {
-            // Aggressively clear all form fields
-            if (emailField) {
-                emailField.value = '';
-                emailField.defaultValue = '';
-            }
-            if (messageField) {
-                messageField.value = '';
-                messageField.defaultValue = '';
-                messageField.textContent = '';
-            }
+            // Multiple clearing attempts for stubborn mobile browsers
+            const clearForm = () => {
+                if (emailField) {
+                    emailField.value = '';
+                    emailField.defaultValue = '';
+                    emailField.setAttribute('value', '');
+                }
+                if (messageField) {
+                    messageField.value = '';
+                    messageField.defaultValue = '';
+                    messageField.textContent = '';
+                    messageField.innerHTML = '';
+                }
+            };
+            
+            // Clear immediately
+            clearForm();
             
             // Reset form
             contactForm.reset();
             
-            // Force clear again after a short delay
+            // Clear again after short delays (for mobile browsers)
+            setTimeout(clearForm, 50);
+            setTimeout(clearForm, 100);
+            setTimeout(clearForm, 250);
+            
+            // Force re-render by temporarily hiding and showing
             setTimeout(() => {
-                if (emailField) emailField.value = '';
-                if (messageField) messageField.value = '';
-            }, 100);
+                if (emailField) emailField.style.display = 'none';
+                if (messageField) messageField.style.display = 'none';
+                setTimeout(() => {
+                    if (emailField) emailField.style.display = '';
+                    if (messageField) messageField.style.display = '';
+                    clearForm();
+                }, 10);
+            }, 300);
             
             // Reset submit button
             const submitButton = contactForm.querySelector('button[type="submit"]');
@@ -360,6 +393,7 @@ function checkFormSubmissionSuccess() {
             
             // Clear session storage
             sessionStorage.removeItem('formSubmitted');
+            sessionStorage.removeItem('formSubmitTime');
             
             // Remove success parameter from URL
             const newUrl = window.location.pathname + window.location.hash;
