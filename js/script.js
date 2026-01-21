@@ -300,10 +300,12 @@ function initializeContactForm() {
                 return;
             }
             
+            // Mark that form is being submitted
+            sessionStorage.setItem('formSubmitted', 'true');
+            
             // Let the form submit naturally to Formspree
             // Show loading state
             const submitButton = contactForm.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.innerHTML;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
             submitButton.disabled = true;
         });
@@ -317,11 +319,47 @@ function initializeContactForm() {
 // Check if form was successfully submitted
 function checkFormSubmissionSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true') {
+    const wasSubmitted = sessionStorage.getItem('formSubmitted') === 'true';
+    
+    if (urlParams.get('success') === 'true' || wasSubmitted) {
         const contactForm = document.getElementById('contactForm');
+        const emailField = document.getElementById('email');
+        const messageField = document.getElementById('message');
+        
         if (contactForm) {
+            // Aggressively clear all form fields
+            if (emailField) {
+                emailField.value = '';
+                emailField.defaultValue = '';
+            }
+            if (messageField) {
+                messageField.value = '';
+                messageField.defaultValue = '';
+                messageField.textContent = '';
+            }
+            
+            // Reset form
             contactForm.reset();
-            showMessage('Thank you for your message! I\'ll get back to you soon.', 'success');
+            
+            // Force clear again after a short delay
+            setTimeout(() => {
+                if (emailField) emailField.value = '';
+                if (messageField) messageField.value = '';
+            }, 100);
+            
+            // Reset submit button
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>';
+                submitButton.disabled = false;
+            }
+            
+            if (urlParams.get('success') === 'true') {
+                showMessage('Thank you for your message! I\'ll get back to you soon.', 'success');
+            }
+            
+            // Clear session storage
+            sessionStorage.removeItem('formSubmitted');
             
             // Remove success parameter from URL
             const newUrl = window.location.pathname + window.location.hash;
